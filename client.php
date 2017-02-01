@@ -1,16 +1,17 @@
 <?php
-$con = mysqli_connect("localhost","","root","");
+$con = mysqli_connect('localhost','root','','booksmart') or die('Error Connection');
 
-	if(isset($_POST['insert_post'])){
-	
+	if(isset($_POST['Submit'])){
+		
+
 	//get the text data from the fields
-	$service_title = $_POST['service_title'];
-	$service_category = $_POST['service_category'];
-	$service_type = $_POST['service_type'];
-	$service_location = $_POST['service_location'];
-	$service_desc = $_POST['service_desc'];
-	$service_price = $_POST['service_price'];
-	$service_keywords = $_POST['service_keywords'];
+	$service_title = trim(mysqli_real_escape_string($con, $_POST['service_title']));
+	$service_category = trim(mysqli_real_escape_string($con, $_POST['service_category']));
+	$service_type = trim(mysqli_real_escape_string($con, $_POST['service_type']));
+	$service_location = trim(mysqli_real_escape_string($con, $_POST['service_location']));
+	$service_desc = trim(mysqli_real_escape_string($con, $_POST['service_desc']));
+	$service_price = trim(mysqli_real_escape_string($con, $_POST['service_price']));
+	$service_keywords = trim(mysqli_real_escape_string($con, $_POST['service_keywords']));
 	
 	//getting the image from the fields
 	$service_image = $_FILES['service_image']['name'];
@@ -18,9 +19,24 @@ $con = mysqli_connect("localhost","","root","");
 	
 	move_uploaded_file($service_image_tmp,"../images/service_image/$service_image");
 	
-	$insert_service = "INSERT INTO service (service_title,service_image,service_category,service_type,service_location,service_desc,service_price,service_keywords) VALUES('$service_title','$service_image','$service_category','$service_type','$service_location','$service_desc','$service_price','$service_keywords')";
+	$sql = mysqli_query($con, "INSERT INTO tbl_service(service_title,service_image,service_category,service_type,service_location,service_desc,service_price,service_keywords) VALUES('$service_title','$service_image','$service_category','$service_type','$service_location','$service_desc','$service_price','$service_keywords')") or die(mysqli_error($con));
+		
+		echo "Your Service Is Now Ready To Be Booked";
+ 
+	}
 	
-	$insert_serv = mysqli_query($con, $insert_service);
+	//if the user upload a service, then update their client status to yes
+	 $sid = mysqli_query($con, "UPDATE tbl_user SET client_status='1' WHERE email='".$email."' AND hash='".$hash."' AND active='0'") or die(mysqli_error());
+        
+		if($sid)
+		{
+		  echo '<div class="statusmsg">You have become a client, you can will now receive limitless benefit.<a href="about_benefit.html>Find Out More</a>"</div>';
+		}
+		else
+		{
+			alert("Your Client status is still inactivated. Please Refresh and retry");
+		}
+	mysqli_close($con);
 ?>
 <!DOCTYPE html>
 <html lang="en">  
@@ -45,7 +61,8 @@ $con = mysqli_connect("localhost","","root","");
   </head>
 <body>
 	<form class="form-horizontal">
-	<form action="service_process.php" method="POST">
+	<form  method="GET"  action="client.php" enctype="multipart/form-data">
+	<!-->use GET method for easier search engine index<!-->
 	<fieldset>
 
 <!-- Form Name -->
@@ -64,7 +81,7 @@ $con = mysqli_connect("localhost","","root","");
 <div class="form-group">
   <label class="col-md-4 control-label" for="image">Service Image:</label>  
   <div class="col-md-4">
-  <input id="services_category" name="services_image" type="file" placeholder="Please upload your image her" class="form-control input-md" required="">
+  <input id="service_image" name="service_image" type="file" placeholder="Please upload your image her" class="form-control input-md" required="">
     
   </div>
 </div>
@@ -73,7 +90,7 @@ $con = mysqli_connect("localhost","","root","");
 <div class="form-group">
   <label class="col-md-4 control-label" for="category">Service Category:</label>  
   <div class="col-md-4">
-  <input id="services_category" name="services_category" type="text" placeholder="State Your Service Category. Eg: Space Rental, Agent" class="form-control input-md" required="">
+  <input id="service_category" name="service_category" type="text" placeholder="State Your Service Category. Eg: Space Rental, Agent" class="form-control input-md" required="">
     
   </div>
 </div>
@@ -118,20 +135,19 @@ $con = mysqli_connect("localhost","","root","");
 <div class="form-group">
   <label class="col-md-4 control-label" for="keyword">Service Keywords:</label>  
   <div class="col-md-4">
-  <input id="service_price" name="service_keywords" type="text" placeholder="Tag for your service. Eg: homestay, travel, cleaning, hospitality" class="form-control input-md" required="">
+  <input id="service_keywords" name="service_keywords" type="text" placeholder="Tag for your service. Eg: homestay, travel, cleaning, hospitality" class="form-control input-md" required="">
     
   </div>
 </div>
 
 	
 	<div class="button" style="text-align:center;">
-	<input type="submit" value="Upload Now!" class="btn btn-primary" id="Submit" name="Submit"/>
+	<input type="submit" value="Upload Now!" class="btn btn-success" id="Submit" name="Submit"/>
 	<input type="submit" value="Cancel" class="btn btn-default" id="Cancel" name="Cancel" />
 	</div>
 	</fieldset>
 	</form>
   </form>
-  
   </body>
 </html>
 				
